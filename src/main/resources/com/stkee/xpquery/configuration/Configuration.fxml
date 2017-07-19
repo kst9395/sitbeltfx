@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+
+<VBox xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.stkee.xpquery.configuration.ConfigurationPresenter">
+   <children>
+      <ToolBar maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+        <items>
+            <Region maxWidth="1.7976931348623157E308" />
+            <TextField fx:id="textSectionName" promptText="Section Name" />
+            <TextField fx:id="textLabelQuery" promptText="Label Query" />
+            <TextField fx:id="textValueQuery" promptText="Value Query" />
+          <Button fx:id="addSectionButton" alignment="CENTER" mnemonicParsing="false" onAction="#addSection" text="Add Section" textAlignment="JUSTIFY" />
+        </items>
+      </ToolBar>
+      <TableView fx:id="sectionTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="columnSectionName" prefWidth="75.0" text="Section" />
+          <TableColumn fx:id="columnLabelQuery" prefWidth="75.0" text="Label Query" />
+          <TableColumn fx:id="columnValueQuery" prefWidth="75.0" text="Value Query" />
+        </columns>
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
+      </TableView>
+   </children>
+</VBox>
