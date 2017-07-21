@@ -17,6 +17,7 @@ public class FXRunner extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		DashboardView view=new DashboardView();
 		Scene scene =new Scene(view.getView());
+		primaryStage.setTitle("XPQuery");
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}

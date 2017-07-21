@@ -14,6 +14,7 @@ import com.xpquery.metadata.SingleFieldDefinition;
 import com.xpquery.metadata.XPQueryConfiguration;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -23,6 +24,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 
 public class ConfigurationPresenter implements Initializable {
 
@@ -40,29 +43,25 @@ public class ConfigurationPresenter implements Initializable {
 
 	final ObservableList<SingleFieldDefinition> fieldDefinitions = FXCollections.observableArrayList();
 
-	
 	DashboardPresenter mediator;
-	
+
 	@Inject
 	private XPQueryConfigurationService configurationService;
-	
+
 	@FXML
 	TextField textSectionName;
-	
+
 	@FXML
 	TextField textLabelQuery;
-	
+
 	@FXML
 	TextField textValueQuery;
-	
-	
+
 	@FXML
 	Button addSectionButton;
-	
-	
+
 	XPQueryConfiguration loadConfiguration;
-	
-	
+
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		columnSectionName.setMaxWidth(1d * Integer.MAX_VALUE * 20);
@@ -76,16 +75,49 @@ public class ConfigurationPresenter implements Initializable {
 		columnValueQuery.setCellFactory(TextFieldTableCell.<SingleFieldDefinition>forTableColumn());
 		sectionTable.setItems(fieldDefinitions);
 		sectionTable.setEditable(true);
-		addSectionButton.disableProperty().bind(textValueQuery.textProperty().isEmpty().or(textLabelQuery.textProperty().isEmpty()).or(textSectionName.textProperty().isEmpty()));
+		addSectionButton.disableProperty().bind(textValueQuery.textProperty().isEmpty()
+				.or(textLabelQuery.textProperty().isEmpty()).or(textSectionName.textProperty().isEmpty()));
+
+		sectionTable.setOnDragOver(e->{
+			
+			if(e.getGestureSource()!=sectionTable && e.getDragboard().hasFiles()){
+				e.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+				
+			}
+			e.consume();
+		});
+		
+		sectionTable.setOnDragDropped(e->{
+			System.out.println("File Dropped");
+			if(e.getGestureSource()!=sectionTable && e.getDragboard().hasFiles()){
+				Dragboard dragboard = e.getDragboard();
+				List<File> files = dragboard.getFiles();
+				File file = files.get(0);
+				
+				loadConfig(file);
+			}
+			e.setDropCompleted(true);
+			e.consume();
+		});
+		
+		
+		fieldDefinitions.addListener(new ListChangeListener<SingleFieldDefinition>() {
+
+			@Override
+			public void onChanged(Change<? extends SingleFieldDefinition> c) {
+				mediator.reloadResult();
+			}
+
+		});
 
 	}
-	
-	public void init(DashboardPresenter mediator){
-		this.mediator=mediator;
+
+	public void init(DashboardPresenter mediator) {
+		this.mediator = mediator;
 	}
-	
+
 	@FXML
-	public void addSection(){
+	public void addSection() {
 		String sectionName = textSectionName.textProperty().getValue();
 		String valueQuery = textValueQuery.textProperty().getValueSafe();
 		String labelQuery = textLabelQuery.textProperty().getValue();
@@ -97,30 +129,27 @@ public class ConfigurationPresenter implements Initializable {
 		textSectionName.textProperty().set("");
 		textValueQuery.textProperty().set("");
 		textLabelQuery.textProperty().set("");
-		
-		
-		
+
 	}
-	
-	
-	public void loadConfig(File file){
-		
-		try(FileInputStream fis = new FileInputStream(file)){
+
+	public void loadConfig(File file) {
+
+		try (FileInputStream fis = new FileInputStream(file)) {
 			loadConfiguration = configurationService.LoadConfiguration(fis);
-			if(loadConfiguration!=null){
+			if (loadConfiguration != null) {
 				List<SingleFieldDefinition> definitions = loadConfiguration.getFieldDefinition().getDefinitions();
+				fieldDefinitions.clear();
 				fieldDefinitions.addAll(definitions);
 			}
-			
-		}catch(Exception e){
-		
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	public XPQueryConfiguration getLoadConfiguration() {
 		return loadConfiguration;
 	}
-	
 
 }
